@@ -29,28 +29,61 @@ class App {
     if (input.length === 0) {
       return //return sempre sai da função
     }
+    //ativa o carregamento
+    this.apresentarBuscando()
+    try {
+      let response = await api.get(`/repos/${input}`)
 
-    let response = await api.get(`/repos/${input}`)
+      let {
+        name,
+        description,
+        html_url,
+        owner: {
+          avatar_url
+        }
+      } = response.data
 
-    let {
-      name,
-      description,
-      html_url,
-      owner: {
-        avatar_url
+      //adicionar o repositorios na lista
+      this.repositorios.push({
+        nome: name,
+        descricao: description,
+        avatar_url,
+        link: html_url,
+      });
+
+      //renderizar tela
+      this.renderizarTela();
+
+    } catch (erro) {
+      //limpar buscando
+      this.lista.removeChild(document.querySelector('.list-group-item-warning'))
+
+      //limpar erro existente
+      let er = this.lista.querySelector('.list-group-item-danger')
+      if (er !== null) {
+        this.lista.removeChild(er)
       }
-    } = response.data
 
-    //adicionar o repositorios na lista
-    this.repositorios.push({
-      nome: name,
-      descricao: description,
-      avatar_url,
-      link: html_url,
-    });
+      //criar uma li para caso de erro
+      let li = document.createElement('li')
+      li.setAttribute('class', 'list-group-item list-group-item-danger')
+      let txtErro = document.createTextNode(`O repositorio ${input} não existe`)
+      // adicionando o texto de erro como filho do novo li
+      li.appendChild(txtErro)
+      this.lista.appendChild(li)
+    }
+  }
 
-    //renderizar tela
-    this.renderizarTela();
+  //aparecer mensagem 'buscando' enquanto faz a pesquisa
+  apresentarBuscando() {
+    //criar uma li enquanto estiver sendo feita a busca
+    let li = document.createElement('li')
+    li.setAttribute('class', 'list-group-item list-group-item-warning')
+    let txtBuscando = document.createTextNode(`Buscando o repositório `)
+    // adicionando o texto de erro como filho do novo li
+    li.appendChild(txtBuscando)
+    this.lista.appendChild(li)
+
   }
 
   //renderizar tela
