@@ -1,3 +1,6 @@
+//importar axio
+import api from './api'
+
 class App {
   //construtor
   constructor() {
@@ -15,15 +18,35 @@ class App {
   registrarEventos() {
     this.formulario.onsubmit = (evento) => this.adicionarRepositorio(evento);
   }
-  adicionarRepositorio(evento) {
+  async adicionarRepositorio(evento) {
     //Evita que o formulário recarregue a página
     evento.preventDefault();
 
+    //recuperar o valor do input
+    let input = this.formulario.querySelector('input[id=repositorio]').value
+
+    //se o input vier vazio, saia da aplicação
+    if (input.length === 0) {
+      return //return sempre sai da função
+    }
+
+    let response = await api.get(`/repos/${input}`)
+
+    let {
+      name,
+      description,
+      html_url,
+      owner: {
+        avatar_url
+      }
+    } = response.data
+
     //adicionar o repositorios na lista
     this.repositorios.push({
-      nome: 'Allison',
-      descricao: 'Estudante',
-      avatar_url: 'https://google.com.br',
+      nome: name,
+      descricao: description,
+      avatar_url,
+      link: html_url,
     });
 
     //renderizar tela
